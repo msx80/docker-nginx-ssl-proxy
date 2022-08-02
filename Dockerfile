@@ -1,5 +1,5 @@
 FROM nginx
-MAINTAINER Daniel Dent (https://www.danieldent.com/)
+MAINTAINER msx80
 
 ENV S6_OVERLAY_SHA256 65f6e4dae229f667e38177d5cad0159af31754b9b8f369096b5b7a9b4580d098
 ENV ENVPLATE_SHA256 8366c3c480379dc325dea725aac86212c5f5d1bf55f5a9ef8e92375f42d55a41
@@ -32,6 +32,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -q \
     && rm ips-v6 ips-v4 ips-v6.sorted ips-v4.sorted \
     && echo "---> Creating directories" \
     && mkdir -p /etc/services.d/nginx /etc/services.d/certbot \
+    && mkdir -p /etc/nginx/custom \
     && echo "---> Cleaning up" \
     && DEBIAN_FRONTEND=noninteractive apt-get remove -y wget \
     && rm -Rf /var/lib/apt /var/cache/apt \
@@ -44,7 +45,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -q \
 
 COPY services.d/nginx/* /etc/services.d/nginx/
 COPY services.d/certbot/* /etc/services.d/certbot/
-COPY nginx.conf security_headers.conf hsts.conf /etc/nginx/
+COPY nginx.conf security_headers.conf /etc/nginx/
 COPY proxy.conf /etc/nginx/conf.d/default.conf
 COPY auth_part*.conf /root/
 COPY dhparams.pem /etc/nginx/
@@ -52,6 +53,8 @@ COPY temp-setup-cert.pem /etc/nginx/temp-server-cert.pem
 COPY temp-setup-key.pem /etc/nginx/temp-server-key.pem
 
 VOLUME "/etc/letsencrypt"
+VOLUME "/etc/nginx/custom"
+
 
 ENTRYPOINT ["/init"]
 CMD []
